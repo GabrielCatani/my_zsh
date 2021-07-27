@@ -1,13 +1,9 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include "AST_Lexer.h"
+#include "my_zsh.h"
 #define PROMPT "catanis_zsh$>"
 #define PROMPT_LEN 13
 
 int main(void)
 {
-
   char *line = NULL;
   size_t line_cap = 0;
   size_t line_len = 0;
@@ -16,11 +12,12 @@ int main(void)
   while (1){
     write(1, PROMPT, PROMPT_LEN);
     while ((line_len = getline(&line, &line_cap, stdin))){
-      write(1, line, line_len);
-      ast.root = (ASTNode *)malloc(sizeof(ASTNode));
-      ast.root->content = strdup(line);
-      write(1, ast.root->content, line_len);
-      write(1, PROMPT, PROMPT_LEN);      
+      ast.build_AST_Lexer(&ast, line);
+      ast.print_lexer(&ast);
+
+      ast.CheckAndExecute(&ast);
+      write(1, PROMPT, PROMPT_LEN);
+      ast.clearAST_Lexer(&ast);
     }
   }
   return 0;
