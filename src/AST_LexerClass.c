@@ -31,7 +31,7 @@ static void build_AST_Lexer(struct AST_Lexer *this, char *input) {
 
   this->root->content = get_next_word(&input);
   this->root->len_content = my_strlen(this->root->content);
-  
+
   char *tmp = NULL;
 
   ASTNode **ptr = &(this->root);
@@ -48,7 +48,7 @@ static void build_AST_Lexer(struct AST_Lexer *this, char *input) {
     else {
       while ((*ptr)) {
         ptr = &(*ptr)->right;
-      }      
+      }
       (*ptr) = (ASTNode *)malloc(sizeof(ASTNode));
       (*ptr)->content = my_strdup(tmp);
       (*ptr)->len_content = my_strlen(tmp);
@@ -57,10 +57,10 @@ static void build_AST_Lexer(struct AST_Lexer *this, char *input) {
   }
 }
 
-static void CheckAndExecute(struct AST_Lexer *this) {
+static void CheckAndExecute(struct AST_Lexer *this, char ***env) {
 
-  if (execute_builtin(is_builtin(this->root->content), this)) {
-    printf("Executing...%s\n", this->root->content);
+  if (this->root && execute_builtin(is_builtin(this->root->content), this, env)) {
+    //    printf("Executing...%s\n", this->root->content);
   }
   else {
     printf("Command not found\n");
@@ -70,22 +70,32 @@ static void CheckAndExecute(struct AST_Lexer *this) {
 static void clearAST_Lexer(struct AST_Lexer *this) {
   ASTNode **ptr = &(this->root);
   ASTNode **tmp = ptr;
-  
+
+  if (!this->root) {
+    return;
+  }
+
+  ptr = &(this->root->right);
   while ((*ptr)) {
     tmp = ptr;
     ptr = &(*ptr)->right;
     free((*tmp)->content);
     free((*tmp));
   }
-  ptr = &(this->root);
+  ptr = &(this->root->left);
   tmp = ptr;
-  
+
   while ((*ptr)) {
     tmp = ptr;
     ptr = &(*ptr)->left;
     free((*tmp)->content);
     free((*tmp));
   }
+
+  free(this->root->content);
+  this->root->content = NULL;
+  free(this->root);
+  this->root = NULL;
 }
 
 struct AST_Lexer new () {
