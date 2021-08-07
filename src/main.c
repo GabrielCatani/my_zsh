@@ -7,9 +7,10 @@ int main(int ac, char **av, char **env)
   size_t line_cap = 0;
   size_t line_len = 0;
   struct AST_Lexer ast = AST_Lexer.new();
-  char **shell_env = copy_env(env);
+  char **shell_env = NULL;
 
   printf("%d %s\n", ac, av[0]);
+  copy_env(env, &shell_env);
   while (1) {
     print_str(PROMPT);
     while ((line_len = getline(&line, &line_cap, stdin))) {
@@ -21,7 +22,6 @@ int main(int ac, char **av, char **env)
       ast.clearAST_Lexer(&ast);
     }
   }
-
   free(shell_env);
   shell_env = NULL;
   return 0;

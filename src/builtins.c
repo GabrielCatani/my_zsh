@@ -71,7 +71,10 @@ void env_builtin(char **env) {
 
 //setenv()
 void setenv_builtin(struct AST_Lexer *this, char ***env) {
-  add_to_env_list(this->root->right->content, this->root->right->right->content, env);
+  if (this->root->right && this->root->right->content &&
+      this->root->right->right && this->root->right->right->content) {
+      add_to_env_list(this->root->right->content, this->root->right->right->content, env);
+  }
 }
 
 //cd
@@ -79,8 +82,9 @@ void cd_builtin(struct AST_Lexer *this, char **env) {
   ASTNode *ptr = this->root;
   char *var_value = NULL;
   char *tmp = NULL;
-  char **cp_env = copy_env(env);
+  char **cp_env = NULL;
 
+  copy_env(env, &cp_env);
   if (!ptr->right && !ptr->left) {
     var_value = get_env_var_content("HOME", cp_env);
   }
@@ -114,4 +118,3 @@ void cd_builtin(struct AST_Lexer *this, char **env) {
   cp_env = NULL;
 }
 
-//echo
