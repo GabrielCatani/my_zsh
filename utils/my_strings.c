@@ -54,12 +54,18 @@ char *my_strdup(char *str) {
   return new_str;
 }
 
-char **my_strtrim(char *str, char sep) {
-  char **trimed = NULL;
+int my_strlen_sep(char *str, char sep) {
+  int len = 0;
+  while (str[len] != sep && str[len] != '\0') {
+    len++;
+  }
+
+  return len;
+}
+
+void my_strtrim(char *str, char sep, char ***trimed) {
   int index = 0;
   int sep_nbr = 0;
-  int start = 0;
-  int end = 0;
 
   while (str[index]) {
     if (str[index] == sep) {
@@ -69,20 +75,21 @@ char **my_strtrim(char *str, char sep) {
   }
 
   sep_nbr++;
-  trimed = (char **)malloc(sizeof(char *) * sep_nbr);
-
-  int i = 0;
-  while (str[end]) {
-    if (str[end] == sep) {
-      trimed[i] = my_strndup(&str[start], end - start);
-      i++;
-      start = end + 1;
-    }
-    end++;
+  int str_len = 0;
+  (*trimed) = (char **)malloc(sizeof(char *) * sep_nbr);
+  str_len = my_strlen_sep(str, sep);
+  (*trimed)[0] = (char *)malloc(sizeof(char) * (str_len + 1));
+  for (int i = 0; i < str_len; i++) {
+    (*trimed)[0][i] = str[i];
   }
-  trimed[i] = my_strndup(&str[start], end - start);
 
-  return trimed;
+  int bunda = str_len;
+  str_len = my_strlen_sep(&str[++str_len], sep);
+  (*trimed)[1] = (char *)malloc(sizeof(char) * (str_len + 1));
+  for (int i = 0; i < str_len; i++) {
+    (*trimed)[1][i] = str[bunda];
+    bunda++;
+  }
 }
 
 int my_strcmp(char *s1, char *s2) {

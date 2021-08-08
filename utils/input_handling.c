@@ -1,5 +1,19 @@
 #include "input_handling.h"
 
+void clear_arr(char ***arr) {
+  int e = 0;
+
+  while ((*arr)[e]) {
+    e++;
+  }
+
+  for (int i = 0; i < e; i++) {
+    free((*arr)[i]);
+
+  }
+  free((*arr));
+}
+
 char *get_next_word(char **input) {
   char *word = NULL;
   int end = 0;
@@ -26,7 +40,7 @@ char *get_env_var_content(char *env_var, char **env) {
   char *var_value = NULL;
 
   for (int i = 0; env[i]; i++) {
-    var_env = my_strtrim(env[i], '=');
+    my_strtrim(env[i], '=', &var_env);
     var_value = my_strdup(var_env[1]);
     if (var_env[0] && !my_strcmp(env_var, var_env[0])){
       free(var_env[0]);
@@ -51,7 +65,7 @@ char *get_env_var(char *env_var, char **env) {
   char *var_key = NULL;
 
   for (int i = 0; env[i]; i++) {
-    var_env = my_strtrim(env[i], '=');
+    my_strtrim(env[i], '=', &var_env);
     var_key = my_strdup(var_env[0]);
     if (var_key && !my_strcmp(env_var, var_key)){
       free(var_env[0]);
@@ -92,59 +106,59 @@ void copy_env(char **str, char ***dst) {
   (*dst)[e] = NULL;
 }
 
-
-void update_var_env(char *name, char *value, char **env) {
-  char **tmp = NULL;
-  int nbr_e = 0;
-
-  while (env[nbr_e]) {
-    nbr_e++;
-  }
-
-  copy_env(env, &tmp);
-  for (int i = 0; i < nbr_e; i++) {
-    free(env[i]);
-    env[i] = NULL;
-  }
-  free(env);
-  env = NULL;
-
-  env = (char **)malloc(sizeof(char *) * (nbr_e));
-  char *env_var = NULL;
+char *form_env_var(char *name, char *value) {
+  char *full_env = NULL;
   char *var = NULL;
-  char *full_var = NULL;
 
-  for (int i = 0; i < nbr_e; i++) {
-    env_var = get_env_var(name, tmp);
-    if (env_var && !my_strcmp(env_var, name)) {
-      var = my_strjoin(name, "=");
-      full_var = my_strjoin(var, value);
-      env[i] = my_strdup(full_var);
-      free(var);
-      free(full_var);
-    }
-    else {
-      env[i] = my_strdup(tmp[i]);;
-    }
-    free(tmp[i]);
-    tmp[i] = NULL;
-  }
-  free(tmp);
-  tmp = NULL;
+  var = my_strjoin(name, "=");
+  full_env = my_strjoin(var, value);
+
+  free(var);
+  return full_env;
 }
 
-void clear_arr(char ***arr) {
+void update_var_env(char *name, char *value, char ***env) {
+  char **tmp = NULL;
+  char **trimed = NULL;
+  char *new_env_var = NULL;
   int e = 0;
 
-  while ((*arr)[e]) {
+  while ((*env)[e]) {
     e++;
   }
 
+  copy_env((*env), &tmp);
+  clear_arr(env);
+
+  (*env) = NULL;
+  (*env) = (char **)malloc(sizeof(char *) * e);
+  int str_len = 0;
   for (int i = 0; i < e; i++) {
-    free((*arr)[i]);
+    my_strtrim(tmp[i], '=', &trimed);
+    if (!my_strcmp(trimed[0], name)) {
+      new_env_var = form_env_var(name, value);
+      str_len = my_strlen(new_env_var);
+      (*env)[i] = (char *)malloc(sizeof(char) * (str_len + 1));
+      for (int j = 0; j < str_len; j++) {
+        (*env)[i][j] = new_env_var[j];
+      }
+      free(new_env_var);
+    }
+    else {
+      str_len = my_strlen(tmp[i]);
+      (*env)[i] = (char *)malloc(sizeof(char) * (str_len + 1));
+      for (int j = 0; j < str_len; j++) {
+        (*env)[i][j] = tmp[i][j];
+      }
+      (*env)[i][str_len] = '\0';
+    }
+
+    free(trimed[0]);
+    free(trimed[1]);
+    free(trimed);
 
   }
-  free((*arr));
+  clear_arr(&tmp);
 }
 
 void add_to_env_list(char *name, char *value, char ***env) {

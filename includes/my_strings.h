@@ -6,7 +6,7 @@
 int my_strlen(char *str);
 char *my_strndup(char *str, int len);
 char *my_strdup(char *str);
-char **my_strtrim(char *str, char sep);
+void my_strtrim(char *str, char sep, char ***trimed);
 int my_strcmp(char *s1, char *s2);
 char *my_strjoin(char *s1, char *s2);
 void print_str(char *str);
