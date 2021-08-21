@@ -21,9 +21,8 @@ char *my_strndup(char *str, int len) {
 
   char *new_str = NULL;
 
-  new_str = (char *)malloc(sizeof(char) * len);
-  if (!new_str) {
-    return NULL;
+  while (!new_str) {
+    new_str = (char *)malloc(sizeof(char) * len);
   }
 
   for (int i = 0; i < len; i++) {
@@ -35,24 +34,19 @@ char *my_strndup(char *str, int len) {
 }
 
 char *my_strdup(char *str) {
-  if (!str) {
-    return NULL;
-  }
-
   char *new_str = NULL;
-  int len = my_strlen(str) + 1;
-  new_str = (char *)malloc(sizeof(char) * len);
-  if (!new_str) {
-    return NULL;
-  }
+  int len = my_strlen(str);
 
-  for (int i = 0; i < len; i++) {
+  new_str = (char *)malloc(sizeof(char) * (len + 1));
+  int i = 0;
+  while (str[i] != '\0') { 
     new_str[i] = str[i];
+    i++;
   }
-
   new_str[len] = '\0';
   return new_str;
 }
+
 
 int my_strlen_sep(char *str, char sep) {
   int len = 0;
@@ -64,32 +58,23 @@ int my_strlen_sep(char *str, char sep) {
 }
 
 void my_strtrim(char *str, char sep, char ***trimed) {
-  int index = 0;
-  int sep_nbr = 0;
-
-  while (str[index]) {
-    if (str[index] == sep) {
-      sep_nbr++;
+  int chuncks = 0;
+  
+  for (int i = 0; str[i] != '\0'; i++) {
+    if (str[i] == sep) {
+      chuncks++;
     }
-    index++;
   }
+  chuncks++;
 
-  sep_nbr++;
+  (*trimed) = (char **)malloc(sizeof(char *) * (chuncks + 1));
   int str_len = 0;
-  (*trimed) = (char **)malloc(sizeof(char *) * sep_nbr);
-  str_len = my_strlen_sep(str, sep);
-  (*trimed)[0] = (char *)malloc(sizeof(char) * (str_len + 1));
-  for (int i = 0; i < str_len; i++) {
-    (*trimed)[0][i] = str[i];
+  for (int i = 0; i < chuncks; i++) {
+    str_len = my_strlen_sep(str, sep);
+    (*trimed)[i] = my_strndup(str, str_len);
+    str += str_len + 1;
   }
-
-  int bunda = str_len;
-  str_len = my_strlen_sep(&str[++str_len], sep);
-  (*trimed)[1] = (char *)malloc(sizeof(char) * (str_len + 1));
-  for (int i = 0; i < str_len; i++) {
-    (*trimed)[1][i] = str[bunda];
-    bunda++;
-  }
+  (*trimed)[chuncks] = NULL;
 }
 
 int my_strcmp(char *s1, char *s2) {
@@ -104,38 +89,71 @@ int my_strcmp(char *s1, char *s2) {
 }
 
 char *my_strjoin(char *s1, char *s2) {
-  char *new_str = NULL;
-  int len = 0;
+  char *str;
+  int i;
 
-  if (!s1 || !s2) {
-    return NULL;
+  if(!s1 || !s2) {
+    return(NULL);
   }
 
-  len = my_strlen(s1);
-  len += my_strlen(s2) + 1;
-
-  new_str = (char *)malloc(sizeof(char) * len);
-  if (!new_str) {
-    return NULL;
+  str = (char*)malloc(sizeof(char) * (my_strlen(s1) + my_strlen(s2) + 1));
+  if(!str) {
+    return (NULL);
   }
 
-  int index = 0;
-  while (s1[index]) {
-    new_str[index] = s1[index];
-    index++;
+  i = 0;
+  while(*s1 != '\0') {
+    str[i++] = *s1++;
   }
 
-  int i = 0;
-  while (s2[i]) {
-    new_str[index] = s2[i];
-    index++;
-    i++;
+  while(*s2 != '\0') {
+    str[i++] = *s2++;
   }
 
-  new_str[index] = '\0';
-  return new_str;
+  str[i] = '\0';
+  return str;
 }
 
 void print_str(char *str) {
   write(1, str, my_strlen(str));
+}
+
+void clear_array(char ***str) {
+  for (int i = 0; (*str)[i] != NULL; i++) {
+    clear_str(&(*str)[i]);
+  }
+}
+
+void clear_str(char **str) {
+  int len = my_strlen(*str);
+  for (int i = 0; i < len; i++) {
+    (*str)[i] = '\0';
+  }
+  (*str)[len] = '\0';
+}
+
+void del_str(char **str) {
+  if (str) {
+    free(*str);
+    *str = NULL;
+  }
+  free(str);
+}
+
+void del_array(char ***str) {
+  for (int i = 0; (*str)[i] != NULL; i++) {
+    del_str(&(*str)[i]);
+  }
+  free(*(*str));
+  free((*str));
+}
+
+int is_in_string(char *haystack, char *needle) {
+
+  for (int i = 0; haystack[i] != '\0'; i++) {
+    if (!my_strcmp(&haystack[i], needle)) {
+      return 1;
+    }
+  }
+  return 0;
 }

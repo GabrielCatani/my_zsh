@@ -1,17 +1,22 @@
 #include "input_handling.h"
 
-void clear_arr(char ***arr) {
-  int e = 0;
+int count_nodes (struct AST_Lexer *ast) {
+  int nbr_nodes = 0;
+  ASTNode *ptr = NULL;
 
-  while ((*arr)[e]) {
-    e++;
+  ptr = ast->root->left;
+  while (ptr) {
+    nbr_nodes++;
+    ptr = ptr->left;
   }
 
-  for (int i = 0; i < e; i++) {
-    free((*arr)[i]);
-
+  ptr = ast->root->right;
+  while (ptr) {
+    nbr_nodes++;
+    ptr = ptr->right;
   }
-  free((*arr));
+
+  return nbr_nodes;
 }
 
 char *get_next_word(char **input) {
@@ -36,160 +41,135 @@ char *get_next_word(char **input) {
 }
 
 char *get_env_var_content(char *env_var, char **env) {
-  char **var_env = NULL;
-  char *var_value = NULL;
+  char **full_var = NULL;
+  char *content = NULL;
+  int index = 0;
 
-  for (int i = 0; env[i]; i++) {
-    my_strtrim(env[i], '=', &var_env);
-    var_value = my_strdup(var_env[1]);
-    if (var_env[0] && !my_strcmp(env_var, var_env[0])){
-      free(var_env[0]);
-      free(var_env[1]);
-      free(var_env);
-      return var_value;
+  while (env[index]) {
+    my_strtrim(env[index], '=', &full_var);
+    if (!(my_strcmp(env_var, full_var[0]))) {
+      content = my_strdup(full_var[1]);
+      free(full_var[0]);
+      free(full_var[1]);
+      free(full_var);
+      return content;
     }
-    free(var_value);
-    var_value = NULL;
-    free(var_env[0]);
-    var_env[0] = NULL;
-    free(var_env[1]);
-    var_env[1] = NULL;
-    free(var_env);
-    var_env = NULL;
+    free(full_var[0]);
+    free(full_var[1]);
+    free(full_var);
+    index++;
   }
+
   return NULL;
 }
 
 char *get_env_var(char *env_var, char **env) {
-  char **var_env = NULL;
-  char *var_key = NULL;
+  char **full_var = NULL;
+  char *content = NULL;
+  int index = 0;
 
-  for (int i = 0; env[i]; i++) {
-    my_strtrim(env[i], '=', &var_env);
-    var_key = my_strdup(var_env[0]);
-    if (var_key && !my_strcmp(env_var, var_key)){
-      free(var_env[0]);
-      free(var_env[1]);
-      free(var_env);
-      return var_key;
+  while (env[index]) {
+    my_strtrim(env[index], '=', &full_var);
+    if (!(my_strcmp(env_var, full_var[0]))) {
+      content = my_strdup(full_var[0]);
+      free(full_var[0]);
+      free(full_var[1]);
+      free(full_var);
+      return content;
     }
-    free(var_key);
-    var_key = NULL;
-    free(var_env[0]);
-    var_env[0] = NULL;
-    free(var_env[1]);
-    var_env[1] = NULL;
-    free(var_env);
-    var_env = NULL;
+    free(full_var[0]);
+    free(full_var[1]);    
+    free(full_var);
+    full_var = NULL;
+    index++;
   }
+
   return NULL;
 }
 
-void copy_env(char **str, char ***dst) {
-  int e = 0;
+void get_bin_src_from_path(char *PATH, char ***bin_paths) {
+  char **full_paths = NULL;
 
-  while (str[e]) {
-    e++;
+  my_strtrim(PATH, ':', &full_paths);
+  int elements = 0;
+  while (full_paths[elements]) {
+    elements++;
   }
+  (*bin_paths) = (char **)malloc(sizeof(char *) * (elements + 1));
+  int i = 0;
+  int index = 0;
 
-  (*dst) = (char **)malloc(sizeof(char *) * e);
-  int str_len = 0;
-  for (int i = 0; i < e; i++) {
-    str_len = my_strlen(str[i]);
-    (*dst)[i] = (char *)malloc(sizeof(char) * (str_len + 1));
-    for (int j = 0; j < str_len; j++) {
-      (*dst)[i][j] = str[i][j];
-    }
-    (*dst)[i][str_len] = '\0';
+  while (full_paths[i] != NULL) {
+    if (is_in_string(full_paths[i], "bin")) {
+      (*bin_paths)[index] = my_strdup(full_paths[i]);
+      index++;
+     }
+    i++;
   }
-
-  (*dst)[e] = NULL;
+  (*bin_paths)[index] = NULL;
+  clear_array(&full_paths);
+  del_array(&full_paths);
 }
 
-char *form_env_var(char *name, char *value) {
-  char *full_env = NULL;
-  char *var = NULL;
+int is_in_dir(char *dir_name, char *file_name) {
+  DIR *dir_path = opendir(dir_name);
+  struct dirent *file = NULL;
 
-  var = my_strjoin(name, "=");
-  full_env = my_strjoin(var, value);
+  if (!dir_path) {
+    return 0;
+  }
+  while ((file = readdir(dir_path))) {
+    if (!(my_strcmp(file->d_name, file_name))) {
+      closedir(dir_path);
+      return 1;
+    }
+  }
+  closedir(dir_path);
 
-  free(var);
-  return full_env;
+  return 0;
 }
 
-void update_var_env(char *name, char *value, char ***env) {
-  char **tmp = NULL;
-  char **trimed = NULL;
-  char *new_env_var = NULL;
-  int e = 0;
+void form_args(struct AST_Lexer *ast, char ***args) {
+  int elements = 0;
+  ASTNode *ptr = NULL;
+  int index = 0;
+  
+  elements = count_nodes(ast);
+  (*args) = (char **)malloc(sizeof(char *) * (elements + 2));
 
-  while ((*env)[e]) {
-    e++;
+  (*args)[index] = my_strdup(ast->root->content);
+  
+  index++;
+  ptr = ast->root->left;
+  while (ptr) {
+    (*args)[index] = my_strdup(ptr->content);
+    ptr = ptr->left;
+    index++;
   }
 
-  copy_env((*env), &tmp);
-  clear_arr(env);
-
-  (*env) = NULL;
-  (*env) = (char **)malloc(sizeof(char *) * e);
-  int str_len = 0;
-  for (int i = 0; i < e; i++) {
-    my_strtrim(tmp[i], '=', &trimed);
-    if (!my_strcmp(trimed[0], name)) {
-      new_env_var = form_env_var(name, value);
-      str_len = my_strlen(new_env_var);
-      (*env)[i] = (char *)malloc(sizeof(char) * (str_len + 1));
-      for (int j = 0; j < str_len; j++) {
-        (*env)[i][j] = new_env_var[j];
-      }
-      free(new_env_var);
-    }
-    else {
-      str_len = my_strlen(tmp[i]);
-      (*env)[i] = (char *)malloc(sizeof(char) * (str_len + 1));
-      for (int j = 0; j < str_len; j++) {
-        (*env)[i][j] = tmp[i][j];
-      }
-      (*env)[i][str_len] = '\0';
-    }
-
-    free(trimed[0]);
-    free(trimed[1]);
-    free(trimed);
-
+  ptr = ast->root->right;
+  while (ptr) {
+    (*args)[index] = my_strdup(ptr->content);
+    ptr = ptr->right;
+    index++;
   }
-  clear_arr(&tmp);
+
+  (*args)[index] = NULL;
 }
 
-void add_to_env_list(char *name, char *value, char ***env) {
-  char **tmp = NULL;
-  int e = 0;
+void convert_home(char **input, char **env) {
+  char *tmp = NULL;
+  char *home = NULL;
+  char *home_tmp = NULL;
+  
+  tmp = my_strdup((*input));
+  free((*input));
+  
+  home = get_env_var_content("HOME", env);
 
-  while ((*env)[e]) {
-    e++;
-  }
-
-  copy_env((*env), &tmp);
-  clear_arr(env);
-
-  (*env) = NULL;
-  (*env) = (char **)malloc(sizeof(char *) * (e + 2));
-  int str_len = 0;
-  for (int i = 0; i < e; i++) {
-    str_len = my_strlen(tmp[i]);
-    (*env)[i] = (char *)malloc(sizeof(char) * (str_len + 1));
-    for (int j = 0; j < str_len; j++) {
-      (*env)[i][j] = tmp[i][j];
-    }
-    (*env)[i][str_len] = '\0';
-  }
-
-  char *var = my_strjoin(name, "=");
-  char *full_var = my_strjoin(var, value);
-  (*env)[e] = my_strdup(full_var);
-  (*env)[(e + 1)] = NULL;
-  free(var);
-  free(full_var);
-
-  clear_arr(&tmp);
+  home_tmp = my_strjoin(home, "/");
+  free(home);
+  (*input) = my_strjoin(home_tmp, &tmp[1]);
+  free(home_tmp);
+  free(tmp);
 }

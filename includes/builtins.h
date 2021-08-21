@@ -12,4 +12,5 @@ void echo_builtin(struct AST_Lexer *this);
 void cd_builtin(struct AST_Lexer *this, char **env);
 void env_builtin(char **env);
 void setenv_builtin(struct AST_Lexer *this, char ***env);
+void unsetenv_builtin(struct AST_Lexer *this, char ***env);
 #endif

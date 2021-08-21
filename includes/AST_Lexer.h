@@ -11,7 +11,7 @@ struct AST_Lexer {
   ASTNode *root;
 
   void (* const print_lexer)(struct AST_Lexer *this);
-  void (* const build_AST_Lexer)(struct AST_Lexer *this, char *input);
+  void (* const build_AST_Lexer)(struct AST_Lexer *this, char *input, char **env);
   void (* const destroy)(struct AST_Lexer *this);
   void (* const CheckAndExecute)(struct AST_Lexer *this, char ***env);
   void (* const clearAST_Lexer)(struct AST_Lexer *this);

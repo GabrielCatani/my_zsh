@@ -10,4 +10,9 @@ void my_strtrim(char *str, char sep, char ***trimed);
 int my_strcmp(char *s1, char *s2);
 char *my_strjoin(char *s1, char *s2);
 void print_str(char *str);
+void clear_str(char **str);
+void clear_array(char ***str);
+void del_array(char ***str);
+void del_str(char **str);
+int is_in_string(char *haystack, char *needle);
 #endif

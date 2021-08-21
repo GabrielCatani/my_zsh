@@ -1,5 +1,6 @@
 #include "builtins.h"
 #include "input_handling.h"
+#include "env_handling.h"
 
 int is_builtin(char *command) {
   const char *builtins[] = {"exit", "env", "unsetenv", "setenv", "cd", "echo"};
@@ -23,6 +24,9 @@ int execute_builtin(int func_index, struct AST_Lexer *this, char ***env) {
     return 1;
   case 1:
     env_builtin((*env));
+    return 1;
+  case 2:
+    unsetenv_builtin(this, env);
     return 1;
   case 3:
     setenv_builtin(this, env);
@@ -68,24 +72,21 @@ void env_builtin(char **env) {
   }
 }
 //unsetenv()
+void unsetenv_builtin(struct AST_Lexer *this, char ***env) {
+  
+  if (this->root->right && this->root->right->content) {
+    rm_from_env_list(this->root->right->content, env);
+ }
+}
+
 
 //setenv()
 void setenv_builtin(struct AST_Lexer *this, char ***env) {
-  char *var = NULL;
-
+  
   if (this->root->right && this->root->right->content &&
       this->root->right->right && this->root->right->right->content)   {
-    var = get_env_var_content(this->root->right->content, (*env));
-    if (var) {
-      update_var_env(this->root->right->content,
-             this->root->right->right->content,
-             env);
-    }
-    else {
-      add_to_env_list(this->root->right->content, this->root->right->right->content, env);
-    }
-  }
-  free(var);
+    add_to_env_list(this->root->right->content, this->root->right->right->content, env);
+ }
 }
 
 //cd
@@ -93,18 +94,16 @@ void cd_builtin(struct AST_Lexer *this, char **env) {
   ASTNode *ptr = this->root;
   char *var_value = NULL;
   char *tmp = NULL;
-  char **cp_env = NULL;
 
-  copy_env(env, &cp_env);
   if (!ptr->right && !ptr->left) {
-    var_value = get_env_var_content("HOME", cp_env);
+    var_value = get_env_var_content("HOME", env);
   }
   else if (ptr->right && ptr->right->content) {
     if (!my_strcmp(ptr->right->content, "~")) {
-      var_value = get_env_var_content("HOME", cp_env);
+      var_value = get_env_var_content("HOME", env);
     }
     else if (*ptr->right->content == '~') {
-      tmp = get_env_var_content("HOME", cp_env);
+      tmp = get_env_var_content("HOME", env);
       var_value = my_strjoin(tmp, &ptr->right->content[1]);
       free(tmp);
     }
@@ -114,18 +113,10 @@ void cd_builtin(struct AST_Lexer *this, char **env) {
   }
   else if (ptr->left && ptr->left->content) {
     if (!my_strcmp(ptr->left->content, "-")) {
-      var_value = get_env_var_content("OLDPWD", cp_env);
+      var_value = get_env_var_content("OLDPWD", env);
     }
   }
   chdir(var_value);
   free(var_value);
   var_value = NULL;
-
-  for (int i = 0; cp_env[i]; i++) {
-    free(cp_env[i]);
-    cp_env[i] = NULL;
-  }
-  free(cp_env);
-  cp_env = NULL;
 }
-
