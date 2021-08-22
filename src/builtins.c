@@ -3,14 +3,14 @@
 #include "env_handling.h"
 
 int is_builtin(char *command) {
-  const char *builtins[] = {"exit", "env", "unsetenv", "setenv", "cd", "echo"};
-
+  char *builtins[] = {"exit", "env", "unsetenv", "setenv", "cd", "echo"};
+  
   if (!command) {
     return -1;
   }
 
   for (int i = 0; i < 6; i++) {
-    if (!strcmp(command, builtins[i])) {
+    if (!my_strcmp(command, builtins[i])) {
       return i;
     }
   }
