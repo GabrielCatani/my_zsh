@@ -1,6 +1,8 @@
-CC=clang
+CC=gcc
+DEBUG=-g3 -fsanitize=address
+#CC=clang
+#DEBUG=-g3 -fsanitize=leak
 FLAGS=-Wall -Wextra -Werror
-DEBUG=-g3 -fsanitize=leak
 INCLUDES= -I includes/
 
 SRC_PATH=./src/

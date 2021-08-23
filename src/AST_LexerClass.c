@@ -34,6 +34,8 @@ static void build_AST_Lexer(struct AST_Lexer *this, char *input, char **env) {
 
   this->root->content = get_next_word(&input);
   this->root->len_content = my_strlen(this->root->content);
+  this->root->right = NULL;
+  this->root->left = NULL;
 
   char *tmp = NULL;
 
@@ -50,6 +52,8 @@ static void build_AST_Lexer(struct AST_Lexer *this, char *input, char **env) {
       (*ptr) = (ASTNode *)malloc(sizeof(ASTNode));
       (*ptr)->content = my_strdup(tmp);
       (*ptr)->len_content = my_strlen(tmp);
+      (*ptr)->right = NULL;
+      (*ptr)->left = NULL;      
     }
     else {
       while ((*ptr)) {
@@ -58,6 +62,8 @@ static void build_AST_Lexer(struct AST_Lexer *this, char *input, char **env) {
       (*ptr) = (ASTNode *)malloc(sizeof(ASTNode));
       (*ptr)->content = my_strdup(tmp);
       (*ptr)->len_content = my_strlen(tmp);
+      (*ptr)->right = NULL;
+      (*ptr)->left = NULL;
     }
     free(tmp);
   }
@@ -91,7 +97,7 @@ static void CheckAndExecute(struct AST_Lexer *this, char ***env) {
     }
     free(args);
     free(PATH_content);
-    del_array(&bin_paths);
+    //del_array(&bin_paths);
   }
   if (this->root && !valid_command) {
     print_str(SHELL_NAME);
@@ -102,34 +108,24 @@ static void CheckAndExecute(struct AST_Lexer *this, char ***env) {
 }
 
 static void clearAST_Lexer(struct AST_Lexer *this) {
-  ASTNode **ptr = &(this->root);
-  ASTNode **tmp = ptr;
+  ASTNode *ptr = NULL;
+  ASTNode *tmp = NULL;
 
-  if (!this->root) {
-    return;
+  ptr = this->root->right;
+  while (ptr) {
+    tmp = ptr->right;
+    free(ptr->content);
+    free(ptr);
+    ptr = tmp;
   }
 
-  ptr = &(this->root->right);
-  while ((*ptr)) {
-    tmp = ptr;
-    ptr = &(*ptr)->right;
-    free((*tmp)->content);
-    free((*tmp));
-  }
-  ptr = &(this->root->left);
-  tmp = ptr;
-
-  while ((*ptr)) {
-    tmp = ptr;
-    ptr = &(*ptr)->left;
-    free((*tmp)->content);
-    free((*tmp));
-  }
-
-  free(this->root->content);
-  this->root->content = NULL;
-  free(this->root);
-  this->root = NULL;
+ ptr = this->root->left;
+  while (ptr) {
+    tmp = ptr->left;
+    free(ptr->content);
+    free(ptr);
+    ptr = tmp;
+  }  
 }
 
 struct AST_Lexer new () {

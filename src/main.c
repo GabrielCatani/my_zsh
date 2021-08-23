@@ -22,7 +22,7 @@ int main(int ac, char **av, char **env)
       ast.CheckAndExecute(&ast, &shell_env);
       print_str(SHELL_NAME);
       print_str(PROMPT);
-      ast.clearAST_Lexer(&ast);
+      //ast.clearAST_Lexer(&ast);
     }
   }
   clear_array(&shell_env);

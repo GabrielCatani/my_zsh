@@ -33,7 +33,6 @@ char *get_next_word(char **input) {
     end++;
   }
 
-
   word = my_strndup(*input, end);
   (*input) += end;
 
