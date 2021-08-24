@@ -97,7 +97,7 @@ static void CheckAndExecute(struct AST_Lexer *this, char ***env) {
     }
     free(args);
     free(PATH_content);
-    del_array(&bin_paths);
+    //del_array(&bin_paths);
   }
   if (this->root && !valid_command) {
     print_str(SHELL_NAME);
