@@ -86,18 +86,21 @@ static void CheckAndExecute(struct AST_Lexer *this, char ***env) {
     for (int i = 0; bin_paths[i]; i++) {
       form_path(bin_paths[i], this->root->content, &full_path_bin);
       if (is_in_dir(bin_paths[i], this->root->content)) {
-	execute_binaries(full_path_bin, args, (*env));
-	valid_command = 1;
+	    execute_binaries(full_path_bin, args, (*env));
+	    valid_command = 1;
       }
-      free(full_path_bin);
-      full_path_bin = NULL;
+    free(full_path_bin);
+    full_path_bin = NULL;
     }
     for (int j = 0; args[j]; j++) {
       free(args[j]);
     }
+    for (int i = 0; bin_paths[i]; i++) {
+        free(bin_paths[i]);
+    }
+    free(bin_paths);
     free(args);
     free(PATH_content);
-    //del_array(&bin_paths);
   }
   if (this->root && !valid_command) {
     print_str(SHELL_NAME);
@@ -110,7 +113,10 @@ static void CheckAndExecute(struct AST_Lexer *this, char ***env) {
 static void clearAST_Lexer(struct AST_Lexer *this) {
   ASTNode *ptr = NULL;
   ASTNode *tmp = NULL;
-
+  
+  if (!this->root) {
+      return;
+  }
   ptr = this->root->right;
   while (ptr) {
     tmp = ptr->right;

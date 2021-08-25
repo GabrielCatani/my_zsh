@@ -48,13 +48,15 @@ char *get_env_var_content(char *env_var, char **env) {
     my_strtrim(env[index], '=', &full_var);
     if (!(my_strcmp(env_var, full_var[0]))) {
       content = my_strdup(full_var[1]);
-      free(full_var[0]);
-      free(full_var[1]);
+      for (int i = 0; full_var[i] != NULL; i++) {
+          free(full_var[i]);
+      }
       free(full_var);
       return content;
     }
-    free(full_var[0]);
-    free(full_var[1]);
+    for (int i = 0; full_var[i] != NULL; i++) {
+        free(full_var[i]);
+    }
     free(full_var);
     index++;
   }

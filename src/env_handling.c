@@ -53,10 +53,6 @@ void add_to_env_list(char *name, char *value, char ***env) {
   }
 
   //del_array(env);
-  for (int i = 0; i < elements; i++) {
-      free((*env)[i]);
-  }
-  free((*env));
   (*env) = (char **)malloc(sizeof(char *) * (elements + 2));
   for (int i = 0; i < elements; i++) {
     (*env)[i] = my_strdup(tmp[i]);
@@ -87,11 +83,9 @@ void rm_from_env_list(char *name, char ***env) {
     tmp[index] = my_strdup((*env)[index]);
     index++;
   }
-  for (int i = 0; i < elements; i++) {
-      free((*env)[i]);
-  }
-  free((*env));
 
+  //clear_array(&(*env));
+  //del_array(env);
   (*env) = (char **)malloc(sizeof(char *) * (elements + 1));
 
   int index_tmp = 0;
