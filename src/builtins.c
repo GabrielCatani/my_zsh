@@ -50,13 +50,13 @@ void echo_builtin(struct AST_Lexer *this) {
 
   ptr = ptr->right;
   while (ptr) {
-    if (ptr->content) {
+    if (ptr->content && this->root->left && this->root->left->content[1] == 'n') {
       write(1, ptr->content, ptr->len_content);
     }
     ptr = ptr->right;
   }
   if (this->root->left && this->root->left->content[1] == 'n') {
-    write(1, "\033[30;47m%", 11);
+    write(1, "\033[30;47m/%%", 11);
     write(1, "\033[0m", 5);
   }
   write(1, "\n", 1);
