@@ -82,8 +82,19 @@ void unsetenv_builtin(struct AST_Lexer *this, char ***env) {
 
 //setenv()
 void setenv_builtin(struct AST_Lexer *this, char ***env) {
-  
+  char *var_env = NULL;
+
+  if (this->root && this->root->right && this->root->right->content) {
+    var_env = get_env_var(this->root->right->content, (*env));
+  }
+
   if (this->root->right && this->root->right->content &&
+          this->root->right->right && this->root->right->right->content &&
+          var_env) {
+    update_var_env(this->root->right->content, this->root->right->right->content, env);
+    free(var_env);
+ }
+ else if (this->root->right && this->root->right->content &&
       this->root->right->right && this->root->right->right->content)   {
     add_to_env_list(this->root->right->content, this->root->right->right->content, env);
  }

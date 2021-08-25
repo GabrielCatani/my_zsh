@@ -34,7 +34,25 @@ void form_path(char *path, char *file, char **full_path) {
 }
 
 void update_var_env(char *name, char *value, char ***env) {
-  printf("%s %s %s\n", name, value, (*env)[0]);
+  char **var_elements = NULL;
+  char *new_var = NULL;
+
+  printf("%s %s\n", name, value);
+  for (int i = 0; (*env)[i] != NULL; i++) {
+      my_strtrim((*env)[i], '=', &var_elements);
+      if (!my_strcmp(var_elements[0], name)) {
+          new_var = form_env_var(name, value);          
+          free((*env)[i]);
+          (*env)[i] = NULL;
+          (*env)[i] = my_strdup(new_var);
+          free(new_var);
+      }
+      for (int j = 0; var_elements[j] != NULL; j++) {
+          free(var_elements[j]);
+      }
+      free(var_elements);
+      var_elements = NULL;
+  }
 }
 
 void add_to_env_list(char *name, char *value, char ***env) {
