@@ -6,7 +6,7 @@ int execute_binaries(char *full_path_bin, char **args, char **env) {
   pid_t pid;
   pid_t wpid;
   int status;
-  
+
   pid = fork();
 
   if (pid == 0) {
@@ -23,6 +23,5 @@ int execute_binaries(char *full_path_bin, char **args, char **env) {
       }
     }
   }
-
   return 1;
 }

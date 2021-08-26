@@ -88,6 +88,9 @@ static void CheckAndExecute(struct AST_Lexer *this, char ***env) {
       if (is_in_dir(bin_paths[i], this->root->content)) {
 	    execute_binaries(full_path_bin, args, (*env));
 	    valid_command = 1;
+        free(full_path_bin);
+        full_path_bin = NULL;
+        break;
       }
     free(full_path_bin);
     full_path_bin = NULL;
