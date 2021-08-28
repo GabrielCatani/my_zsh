@@ -3,14 +3,14 @@
 #include "env_handling.h"
 
 int is_builtin(char *command) {
-  const char *builtins[] = {"exit", "env", "unsetenv", "setenv", "cd", "echo"};
-
+  char *builtins[] = {"exit", "env", "unsetenv", "setenv", "cd", "echo"};
+  
   if (!command) {
     return -1;
   }
 
   for (int i = 0; i < 6; i++) {
-    if (!strcmp(command, builtins[i])) {
+    if (!my_strcmp(command, builtins[i])) {
       return i;
     }
   }
@@ -50,13 +50,13 @@ void echo_builtin(struct AST_Lexer *this) {
 
   ptr = ptr->right;
   while (ptr) {
-    if (ptr->content) {
+    if (ptr->content && this->root->left && this->root->left->content[1] == 'n') {
       write(1, ptr->content, ptr->len_content);
     }
     ptr = ptr->right;
   }
   if (this->root->left && this->root->left->content[1] == 'n') {
-    write(1, "\033[30;47m%", 11);
+    write(1, "\033[30;47m/%%", 11);
     write(1, "\033[0m", 5);
   }
   write(1, "\n", 1);
@@ -82,8 +82,19 @@ void unsetenv_builtin(struct AST_Lexer *this, char ***env) {
 
 //setenv()
 void setenv_builtin(struct AST_Lexer *this, char ***env) {
-  
+  char *var_env = NULL;
+
+  if (this->root && this->root->right && this->root->right->content) {
+    var_env = get_env_var(this->root->right->content, (*env));
+  }
+
   if (this->root->right && this->root->right->content &&
+          this->root->right->right && this->root->right->right->content &&
+          var_env) {
+    update_var_env(this->root->right->content, this->root->right->right->content, env);
+    free(var_env);
+ }
+ else if (this->root->right && this->root->right->content &&
       this->root->right->right && this->root->right->right->content)   {
     add_to_env_list(this->root->right->content, this->root->right->right->content, env);
  }

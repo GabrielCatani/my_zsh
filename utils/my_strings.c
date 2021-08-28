@@ -21,9 +21,7 @@ char *my_strndup(char *str, int len) {
 
   char *new_str = NULL;
 
-  while (!new_str) {
-    new_str = (char *)malloc(sizeof(char) * len);
-  }
+  new_str = (char *)malloc(sizeof(char) * (len + 1));
 
   for (int i = 0; i < len; i++) {
     new_str[i] = str[i];

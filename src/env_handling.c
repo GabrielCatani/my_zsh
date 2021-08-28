@@ -34,7 +34,25 @@ void form_path(char *path, char *file, char **full_path) {
 }
 
 void update_var_env(char *name, char *value, char ***env) {
-  printf("%s %s %s\n", name, value, (*env)[0]);
+  char **var_elements = NULL;
+  char *new_var = NULL;
+
+  printf("%s %s\n", name, value);
+  for (int i = 0; (*env)[i] != NULL; i++) {
+      my_strtrim((*env)[i], '=', &var_elements);
+      if (!my_strcmp(var_elements[0], name)) {
+          new_var = form_env_var(name, value);          
+          free((*env)[i]);
+          (*env)[i] = NULL;
+          (*env)[i] = my_strdup(new_var);
+          free(new_var);
+      }
+      for (int j = 0; var_elements[j] != NULL; j++) {
+          free(var_elements[j]);
+      }
+      free(var_elements);
+      var_elements = NULL;
+  }
 }
 
 void add_to_env_list(char *name, char *value, char ***env) {
@@ -52,8 +70,7 @@ void add_to_env_list(char *name, char *value, char ***env) {
     index++;
   }
 
-  clear_array(&(*env));
-  del_array(&(*env));
+  //del_array(env);
   (*env) = (char **)malloc(sizeof(char *) * (elements + 2));
   for (int i = 0; i < elements; i++) {
     (*env)[i] = my_strdup(tmp[i]);
@@ -61,10 +78,13 @@ void add_to_env_list(char *name, char *value, char ***env) {
   char *new_var = form_env_var(name, value);
   (*env)[elements] = my_strdup(new_var);
   (*env)[elements + 1] = NULL;
-
+  
+  for (int i = 0; i < elements; i++) {
+      free(tmp[i]);
+  }
+   free(tmp);
+  //del_array(&tmp);
   free(new_var);
-  clear_array(&tmp);
-  del_array(&tmp);
 }
 
 void rm_from_env_list(char *name, char ***env) {
@@ -82,9 +102,9 @@ void rm_from_env_list(char *name, char ***env) {
     index++;
   }
 
-  clear_array(&(*env));
-  del_array(&(*env));
-  (*env) = (char **)malloc(sizeof(char *) * (elements));
+  //clear_array(&(*env));
+  //del_array(env);
+  (*env) = (char **)malloc(sizeof(char *) * (elements + 1));
 
   int index_tmp = 0;
   char **tmp_var = NULL;  
@@ -94,14 +114,15 @@ void rm_from_env_list(char *name, char ***env) {
       (*env)[index_tmp] = my_strdup(tmp[i]);
       index_tmp++;
     }
-    clear_array(&tmp_var);
-    free(tmp_var[0]);
-    free(tmp_var[1]);    
+    for (int j = 0; tmp_var[j]; j++) {
+        free(tmp_var[j]);
+    }
     free(tmp_var);
   }
-  free(tmp_var);
-  (*env)[elements] = NULL;
-
-  clear_array(&tmp);
-  del_array(&tmp);
+  // free(tmp_var);
+  (*env)[index_tmp] = NULL;
+  for (int i = 0; i < elements; i++) {
+      free(tmp[i]);
+  }
+  free(tmp);
 }
