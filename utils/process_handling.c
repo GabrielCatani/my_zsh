@@ -4,24 +4,14 @@
 int execute_binaries(char *full_path_bin, char **args, char **env) {
 
   pid_t pid;
-  pid_t wpid;
-  int status;
 
+  printf("%s %s %s\n", full_path_bin, args[0], env[0]);
   pid = fork();
-
-  if (pid == 0) {
-    if (execve(full_path_bin, args, env) == -1) {
-      perror(PROMPT);
-    }
-
-    exit(EXIT_FAILURE);
+  if (pid > 0) {
+      printf("Parent %d\n", getpid());
   }
   else {
-    while ((wpid = waitpid(pid, &status, WUNTRACED))) {
-      if (WIFEXITED(status) || WIFSIGNALED(status)) {
-        break;
-      }
-    }
+      printf("Child %d\n", getpid());
   }
   return 1;
 }

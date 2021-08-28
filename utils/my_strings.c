@@ -35,7 +35,14 @@ char *my_strdup(char *str) {
   char *new_str = NULL;
   int len = my_strlen(str);
 
+  if (!str) {
+      return NULL;
+  }
+
   new_str = (char *)malloc(sizeof(char) * (len + 1));
+  if (!str) {
+      return NULL;
+  }
   int i = 0;
   while (str[i] != '\0') { 
     new_str[i] = str[i];
