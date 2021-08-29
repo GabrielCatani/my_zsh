@@ -26,7 +26,7 @@ char *form_env_var(char *name, char *value) {
 
 void form_path(char *path, char *file, char **full_path) {
   char *tmp_path = NULL;
-
+  
   tmp_path = my_strjoin(path, "/");
   (*full_path) = my_strjoin(tmp_path, file);
 

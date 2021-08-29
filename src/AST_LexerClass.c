@@ -92,6 +92,13 @@ static void CheckAndExecute(struct AST_Lexer *this, char ***env) {
         full_path_bin = NULL;
         break;
       }
+      else if (this->root->content && this->root->content[0] == '.' && this->root->content[1] == '/') {
+        execute_binaries(this->root->content, args, (*env));
+        valid_command = 1;
+        free(full_path_bin);
+        full_path_bin = NULL;
+        break;
+      }
     free(full_path_bin);
     full_path_bin = NULL;
     }
