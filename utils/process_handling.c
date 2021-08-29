@@ -7,7 +7,6 @@ int execute_binaries(char *full_path_bin, char **args, char **env) {
   pid_t wpid;
   int status;
 
-  printf("%s %s\n", full_path_bin, args[0]);
   pid = fork();
 
   if (pid == 0) {
