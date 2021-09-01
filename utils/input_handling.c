@@ -118,7 +118,8 @@ int is_in_dir(char *dir_name, char *file_name) {
   DIR *dir_path = opendir(dir_name);
   struct dirent *file = NULL;
 
-  if (!dir_path) {
+  if (!dir_path || !file_name) {
+      closedir(dir_path);
     return 0;
   }
   while ((file = readdir(dir_path))) {

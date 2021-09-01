@@ -26,7 +26,7 @@ char *form_env_var(char *name, char *value) {
 
 void form_path(char *path, char *file, char **full_path) {
   char *tmp_path = NULL;
-
+  
   tmp_path = my_strjoin(path, "/");
   (*full_path) = my_strjoin(tmp_path, file);
 
@@ -37,7 +37,6 @@ void update_var_env(char *name, char *value, char ***env) {
   char **var_elements = NULL;
   char *new_var = NULL;
 
-  printf("%s %s\n", name, value);
   for (int i = 0; (*env)[i] != NULL; i++) {
       my_strtrim((*env)[i], '=', &var_elements);
       if (!my_strcmp(var_elements[0], name)) {
@@ -71,6 +70,11 @@ void add_to_env_list(char *name, char *value, char ***env) {
   }
 
   //del_array(env);
+
+  for (int i = 0; (*env)[i] ; i++) {
+      free((*env)[i]);
+  }
+  free((*env));
   (*env) = (char **)malloc(sizeof(char *) * (elements + 2));
   for (int i = 0; i < elements; i++) {
     (*env)[i] = my_strdup(tmp[i]);
@@ -104,6 +108,10 @@ void rm_from_env_list(char *name, char ***env) {
 
   //clear_array(&(*env));
   //del_array(env);
+  for (int i = 0; (*env)[i] ; i++) {
+      free((*env)[i]);
+  }
+  free((*env));  
   (*env) = (char **)malloc(sizeof(char *) * (elements + 1));
 
   int index_tmp = 0;

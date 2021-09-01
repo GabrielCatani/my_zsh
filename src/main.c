@@ -25,6 +25,10 @@ int main(int ac, char **av, char **env)
       ast.clearAST_Lexer(&ast);
     }
   }
+  for (int i = 0; shell_env[i]; i++) {
+    free(shell_env[i]);
+  }
+  free(shell_env);
   clear_array(&shell_env);
   del_array(&shell_env);
   return 0;
